@@ -14,13 +14,15 @@ import { CandidateCard } from "@/components/CandidateCard";
 import { mockCandidates } from "@/data/mockData";
 import { Candidate, CandidateStatus } from "@/types/candidate";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 
-const columns: { id: CandidateStatus; title: string; color: string }[] = [
-  { id: "applied", title: "Applied", color: "bg-muted" },
-  { id: "screening", title: "Screening", color: "bg-warning" },
-  { id: "interview", title: "Interview", color: "bg-primary" },
-  { id: "offer", title: "Offer", color: "bg-accent" },
-  { id: "hired", title: "Hired", color: "bg-success" },
+const columns: { id: CandidateStatus; title: string; color: string; emoji: string }[] = [
+  { id: "applied", title: "Applied", color: "bg-muted", emoji: "📝" },
+  { id: "screening", title: "Screening", color: "bg-warning", emoji: "🔍" },
+  { id: "interview", title: "Interview", color: "bg-primary", emoji: "💬" },
+  { id: "offer", title: "Offer", color: "bg-accent", emoji: "🎯" },
+  { id: "hired", title: "Hired", color: "bg-success", emoji: "🎉" },
 ];
 
 const Candidates = () => {
@@ -56,6 +58,10 @@ const Candidates = () => {
           c.id === active.id ? { ...c, status: newStatus } : c
         )
       );
+      
+      toast.success(`${activeCandidate.name} moved to ${newStatus}`, {
+        description: `Status updated successfully`,
+      });
     }
 
     setActiveId(null);
@@ -69,12 +75,16 @@ const Candidates = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-4xl font-bold tracking-tight">Candidate Pipeline</h1>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-4xl font-bold tracking-tight text-gradient">Candidate Pipeline</h1>
         <p className="text-muted-foreground mt-2">
-          Drag and drop candidates to update their status
+          Drag and drop candidates to update their status • Real-time updates
         </p>
-      </div>
+      </motion.div>
 
       <DndContext
         sensors={sensors}
@@ -82,7 +92,7 @@ const Candidates = () => {
         onDragEnd={handleDragEnd}
       >
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {columns.map((column) => {
+          {columns.map((column, columnIndex) => {
             const columnCandidates = getCandidatesByStatus(column.id);
             return (
               <SortableContext
@@ -91,32 +101,86 @@ const Candidates = () => {
                 items={columnCandidates.map((c) => c.id)}
                 strategy={verticalListSortingStrategy}
               >
-                <Card className="shadow-soft min-h-[600px]">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={cn(
-                          "h-3 w-3 rounded-full",
-                          column.color
-                        )}
-                      />
-                      <CardTitle className="text-base">
-                        {column.title}
-                      </CardTitle>
-                      <span className="ml-auto text-sm text-muted-foreground">
-                        {columnCandidates.length}
-                      </span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {columnCandidates.map((candidate) => (
-                      <CandidateCard
-                        key={candidate.id}
-                        candidate={candidate}
-                      />
-                    ))}
-                  </CardContent>
-                </Card>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: columnIndex * 0.1 }}
+                  whileHover={{ y: -4 }}
+                >
+                  <Card className="shadow-soft hover:shadow-strong transition-all min-h-[600px] relative overflow-hidden group">
+                    <div className={cn(
+                      "absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity",
+                      column.color.replace('bg-', 'bg-gradient-to-br from-')
+                    )} />
+                    
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center gap-2">
+                        <motion.div
+                          animate={{ rotate: [0, 10, -10, 0] }}
+                          transition={{ 
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatDelay: 3
+                          }}
+                          className="text-2xl"
+                        >
+                          {column.emoji}
+                        </motion.div>
+                        <motion.div
+                          className={cn(
+                            "h-3 w-3 rounded-full",
+                            column.color
+                          )}
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ 
+                            duration: 2,
+                            repeat: Infinity,
+                            delay: columnIndex * 0.2
+                          }}
+                        />
+                        <CardTitle className="text-base">
+                          {column.title}
+                        </CardTitle>
+                        <motion.span 
+                          className="ml-auto text-sm font-bold bg-gradient-primary bg-clip-text text-transparent"
+                          key={columnCandidates.length}
+                          initial={{ scale: 1.5 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring" }}
+                        >
+                          {columnCandidates.length}
+                        </motion.span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <AnimatePresence mode="popLayout">
+                        {columnCandidates.map((candidate) => (
+                          <CandidateCard
+                            key={candidate.id}
+                            candidate={candidate}
+                          />
+                        ))}
+                      </AnimatePresence>
+                      
+                      {columnCandidates.length === 0 && (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="flex flex-col items-center justify-center py-12 text-muted-foreground"
+                        >
+                          <motion.div
+                            animate={{ y: [0, -10, 0] }}
+                            transition={{ repeat: Infinity, duration: 2 }}
+                            className="text-4xl mb-2"
+                          >
+                            {column.emoji}
+                          </motion.div>
+                          <p className="text-sm">Drop candidates here</p>
+                        </motion.div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
               </SortableContext>
             );
           })}
@@ -124,7 +188,9 @@ const Candidates = () => {
 
         <DragOverlay>
           {activeCandidate ? (
-            <CandidateCard candidate={activeCandidate} />
+            <div className="rotate-6 scale-105">
+              <CandidateCard candidate={activeCandidate} />
+            </div>
           ) : null}
         </DragOverlay>
       </DndContext>

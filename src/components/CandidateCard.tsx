@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Candidate } from "@/types/candidate";
 import { Mail, MapPin, Calendar, GripVertical } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { motion } from "framer-motion";
 import {
   HoverCard,
   HoverCardContent,
@@ -32,19 +33,31 @@ export const CandidateCard = ({ candidate }: CandidateCardProps) => {
   };
 
   return (
-    <div ref={setNodeRef} style={style}>
+    <motion.div
+      ref={setNodeRef}
+      style={style}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ scale: 1.02 }}
+      transition={{ duration: 0.2 }}
+    >
       <HoverCard>
         <HoverCardTrigger asChild>
-          <Card className="cursor-move shadow-soft hover:shadow-medium transition-all">
-            <CardContent className="p-4">
+          <Card className="cursor-move shadow-soft hover:shadow-strong transition-all group relative overflow-hidden">
+            {/* Shimmer effect on hover */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+            
+            <CardContent className="p-4 relative">
               <div className="flex items-start gap-3">
-                <div
+                <motion.div
                   {...attributes}
                   {...listeners}
                   className="cursor-grab active:cursor-grabbing mt-1"
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
                 >
                   <GripVertical className="h-5 w-5 text-muted-foreground" />
-                </div>
+                </motion.div>
                 <div className="flex-1 space-y-3">
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -55,20 +68,33 @@ export const CandidateCard = ({ candidate }: CandidateCardProps) => {
                         {candidate.position}
                       </p>
                     </div>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-primary text-primary-foreground font-semibold text-sm shrink-0">
+                    <motion.div 
+                      className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-primary text-primary-foreground font-semibold text-sm shrink-0"
+                      whileHover={{ 
+                        rotate: 360,
+                        scale: 1.1,
+                      }}
+                      transition={{ duration: 0.6 }}
+                    >
                       {candidate.name.split(" ").map((n) => n[0]).join("")}
-                    </div>
+                    </motion.div>
                   </div>
 
                   <div className="flex flex-wrap gap-1.5">
-                    {candidate.skills.slice(0, 3).map((skill) => (
-                      <Badge
+                    {candidate.skills.slice(0, 3).map((skill, i) => (
+                      <motion.div
                         key={skill}
-                        variant="secondary"
-                        className="text-xs"
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: i * 0.05 }}
                       >
-                        {skill}
-                      </Badge>
+                        <Badge
+                          variant="secondary"
+                          className="text-xs hover:bg-primary/20 transition-colors"
+                        >
+                          {skill}
+                        </Badge>
+                      </motion.div>
                     ))}
                     {candidate.skills.length > 3 && (
                       <Badge variant="secondary" className="text-xs">
@@ -92,8 +118,12 @@ export const CandidateCard = ({ candidate }: CandidateCardProps) => {
             </CardContent>
           </Card>
         </HoverCardTrigger>
-        <HoverCardContent className="w-80" side="right">
-          <div className="space-y-3">
+        <HoverCardContent className="w-80 glass" side="right">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-3"
+          >
             <div>
               <h4 className="font-semibold">{candidate.name}</h4>
               <p className="text-sm text-muted-foreground">
@@ -125,9 +155,9 @@ export const CandidateCard = ({ candidate }: CandidateCardProps) => {
                 Experience: {candidate.experience}
               </p>
             </div>
-          </div>
+          </motion.div>
         </HoverCardContent>
       </HoverCard>
-    </div>
+    </motion.div>
   );
 };
