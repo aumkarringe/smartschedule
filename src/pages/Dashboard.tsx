@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { mockCandidates, mockInterviews } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
-import { motion } from "framer-motion";
 
 const Dashboard = () => {
   const stats = {
@@ -33,16 +32,12 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-8">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <h1 className="text-4xl font-bold tracking-tight text-gradient">Dashboard</h1>
+      <div>
+        <h1 className="text-4xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground mt-2">
           Welcome back! Here's what's happening with your recruitment pipeline.
         </p>
-      </motion.div>
+      </div>
 
       {/* Stats Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -53,7 +48,6 @@ const Dashboard = () => {
           changeType="positive"
           icon={Users}
           gradient
-          index={0}
         />
         <StatsCard
           title="Active Interviews"
@@ -61,7 +55,6 @@ const Dashboard = () => {
           change="Scheduled this week"
           changeType="neutral"
           icon={Calendar}
-          index={1}
         />
         <StatsCard
           title="Offers Extended"
@@ -69,7 +62,6 @@ const Dashboard = () => {
           change="+2 this week"
           changeType="positive"
           icon={TrendingUp}
-          index={2}
         />
         <StatsCard
           title="Avg Time to Hire"
@@ -77,137 +69,86 @@ const Dashboard = () => {
           change="-3 days improvement"
           changeType="positive"
           icon={Clock}
-          index={3}
         />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Recent Candidates */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <Card className="shadow-soft hover:shadow-strong transition-all overflow-hidden relative group">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                Recent Candidates
-                <motion.div
-                  className="h-2 w-2 rounded-full bg-success"
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentCandidates.map((candidate, index) => (
-                  <motion.div
-                    key={candidate.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ x: 8, transition: { duration: 0.2 } }}
-                    className="flex items-center justify-between rounded-lg border border-border bg-gradient-card p-4 transition-all hover:shadow-soft cursor-pointer"
-                  >
-                    <div className="flex items-center gap-4">
-                      <motion.div 
-                        className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-primary text-primary-foreground font-semibold"
-                        whileHover={{ rotate: 360 }}
-                        transition={{ duration: 0.6 }}
-                      >
-                        {candidate.name.split(" ").map((n) => n[0]).join("")}
-                      </motion.div>
-                      <div>
-                        <p className="font-semibold">{candidate.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {candidate.position}
-                        </p>
-                      </div>
+        <Card className="shadow-soft hover:shadow-medium transition-shadow">
+          <CardHeader>
+            <CardTitle>Recent Candidates</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentCandidates.map((candidate) => (
+                <div
+                  key={candidate.id}
+                  className="flex items-center justify-between rounded-lg border border-border bg-gradient-card p-4 transition-all hover:shadow-soft"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
+                      {candidate.name.split(" ").map((n) => n[0]).join("")}
                     </div>
-                    <Badge className={getStatusColor(candidate.status)}>
-                      {candidate.status}
-                    </Badge>
-                  </motion.div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+                    <div>
+                      <p className="font-semibold">{candidate.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {candidate.position}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge className={getStatusColor(candidate.status)}>
+                    {candidate.status}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Upcoming Interviews */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <Card className="shadow-soft hover:shadow-strong transition-all overflow-hidden relative group">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                Upcoming Interviews
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
-                >
-                  <Calendar className="h-4 w-4 text-primary" />
-                </motion.div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {upcomingInterviews.length > 0 ? (
-                  upcomingInterviews.map((interview, index) => (
-                    <motion.div
-                      key={interview.id}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      whileHover={{ x: -8, transition: { duration: 0.2 } }}
-                      className="rounded-lg border border-border bg-gradient-card p-4 transition-all hover:shadow-soft cursor-pointer"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <p className="font-semibold">
-                            {interview.candidateName}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {interview.position}
-                          </p>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="h-4 w-4 text-primary" />
-                            <span className="text-muted-foreground">
-                              {formatDistanceToNow(interview.date, {
-                                addSuffix: true,
-                              })}
-                            </span>
-                          </div>
-                        </div>
-                        <motion.div
-                          whileHover={{ scale: 1.1 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <Badge className="bg-primary/10 text-primary">
-                            {interview.type}
-                          </Badge>
-                        </motion.div>
-                      </div>
-                    </motion.div>
-                  ))
-                ) : (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-center text-muted-foreground py-8"
+        <Card className="shadow-soft hover:shadow-medium transition-shadow">
+          <CardHeader>
+            <CardTitle>Upcoming Interviews</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {upcomingInterviews.length > 0 ? (
+                upcomingInterviews.map((interview) => (
+                  <div
+                    key={interview.id}
+                    className="rounded-lg border border-border bg-gradient-card p-4 transition-all hover:shadow-soft"
                   >
-                    No upcoming interviews scheduled
-                  </motion.p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <p className="font-semibold">
+                          {interview.candidateName}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {interview.position}
+                        </p>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Calendar className="h-4 w-4 text-primary" />
+                          <span className="text-muted-foreground">
+                            {formatDistanceToNow(interview.date, {
+                              addSuffix: true,
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                      <Badge className="bg-primary/10 text-primary">
+                        {interview.type}
+                      </Badge>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-muted-foreground py-8">
+                  No upcoming interviews scheduled
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
